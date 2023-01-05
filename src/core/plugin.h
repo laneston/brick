@@ -19,7 +19,7 @@ extern "C"
 #endif
 
 // the module enable congfig file direction.
-#define FILE_PLUGIN_DIR "./moduleEnable.json"
+#define FILE_PLUGIN_DIR "./routeMapping.json"
 #define FILE_PLUGIN_LEN 2048
 
 // the route mapping config file

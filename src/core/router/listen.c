@@ -617,7 +617,7 @@ static int route_listen_getMapping(pluginModuleTypeDef *p_plugin)
     int read_len = read(FILE_p, configString, FILE_ROUTE_LEN);
     if (read_len > 0)
     {
-        log_printf("moduleEnable_json_get: [read_len %d]\n%s\n", read_len, configString);
+        // log_printf("route_listen_getMapping: [read_len %d]\n%s\n", read_len, configString);
         close(FILE_p);
     }
     else
@@ -647,61 +647,80 @@ static int route_listen_getMapping(pluginModuleTypeDef *p_plugin)
     pluginRegLinkList *node_tmp = NULL;
 
     cJSON *item = NULL;
-    cJSON *array_item = NULL;
+    cJSON *item_route = NULL;
+    cJSON *array_route = NULL;
     int array_size = 0;
     char **array_node = (char **)malloc(sizeof(char *) * 64); // 64 strings
     short node_count = 0;
 
     // printf("route_listen_getMapping: p_plugin->moduleNum %d\n", p_plugin->moduleNum);
-    for (size_t i = 0; i < p_plugin->moduleNum; i++)
+    for (size_t i = 0; (i < p_plugin->moduleNum) && (node != NULL); i++)
     {
         // 获取插件同名路由信息
         item = cJSON_GetObjectItem(root, node->moduleMsg->moduleName);
         if (item == NULL)
         {
+            log_printf("route_listen_getMapping [ERROR] item = cJSON_GetObjectItem(root, node->moduleMsg->moduleName);\n");
             node = node->next;
             continue;
         }
         else
         {
-            if (item->type != cJSON_Array)
+            if (item->type != cJSON_Object)
             {
-                log_printf("route_listen_getMapping: item->type error!\n");
+                log_printf("route_listen_getMapping [ERROR] if (item->type != cJSON_Object)\n");
                 node = node->next;
                 continue;
             }
         }
 
-        array_size = cJSON_GetArraySize(item);
+        item_route = cJSON_GetObjectItem(item, "route");
+        if (item_route == NULL)
+        {
+            log_printf("route_listen_getMapping [ERROR] item_route = cJSON_GetObjectItem(item, \"route\");\n");
+            node = node->next;
+            continue;
+        }
+        else
+        {
+            if (item_route->type != cJSON_Array)
+            {
+                log_printf("route_listen_getMapping [ERROR] if (item_route->type != cJSON_Array)\n");
+                node = node->next;
+                continue;
+            }
+        }
+
+        array_size = cJSON_GetArraySize(item_route);
         // printf("route_listen_getMapping: array_size %d\n", array_size);
 
         for (size_t j = 0; j < array_size; j++)
         {
-            array_item = cJSON_GetArrayItem(item, j);
-            if (array_item == NULL)
+            array_route = cJSON_GetArrayItem(item_route, j);
+            if (array_route == NULL)
             {
                 log_printf("route_listen_getMapping: cJSON_GetObjectItem error!\n");
                 continue;
             }
             else
             {
-                if (array_item->type != cJSON_String)
+                if (array_route->type != cJSON_String)
                 {
-                    log_printf("route_listen_getMapping: array_item->type error!\n");
+                    log_printf("route_listen_getMapping: array_route->type error!\n");
                     continue;
                 }
             }
 
             node_tmp = p_plugin->p_head;
-            for (size_t k = 0; k < p_plugin->moduleNum; k++)
+            for (size_t k = 0; (k < p_plugin->moduleNum) && (node_tmp != NULL); k++)
             {
-                if (!strcmp(array_item->valuestring, node_tmp->moduleMsg->moduleName))
+                if (!strcmp(array_route->valuestring, node_tmp->moduleMsg->moduleName))
                 {
                     array_node[node_count] = (char *)malloc(sizeof(char) * 128); // 128 bytes
 
                     // 将插件名称填入路由节点, 将映射节点填入路由节点中
                     memset(array_node[node_count], 0x00, 128);
-                    strcpy(array_node[node_count], array_item->valuestring);
+                    strcpy(array_node[node_count], array_route->valuestring);
                     printf("array_node[%d]: %s\n", node_count, array_node[node_count]);
                     node_count++;
                 }

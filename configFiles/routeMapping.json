@@ -1,12 +1,21 @@
 {
-	"testa": [
-		"testb"
-	],
-	"testb": [
-		"testa",
-		"testc"
-	],
-	"testc": [
-		"testb"
-	]
+	"testa": {
+		"status": "enable",
+		"route": [
+			"testb"
+		]
+	},
+	"testb": {
+		"status": "enable",
+		"route": [
+			"testa",
+			"testc"
+		]
+	},
+	"testc": {
+		"status": "enable",
+		"route": [
+			"testb"
+		]
+	}
 }

@@ -46,7 +46,7 @@ static int plugin_reg_add(pluginModuleTypeDef *p_plugin, const brickPluginRegist
         p_plugin->p_tail = pdata;
     }
 
-    p_plugin->moduleNum++;
+    p_plugin->moduleNum++; // 插件数目计数
     log_printf("plugin_reg_add: [moduleNum %d]\n", p_plugin->moduleNum);
 
     pthread_mutex_unlock(&(p_plugin->mutex));
@@ -138,32 +138,44 @@ static int moduleEnable_json_get(pluginModuleTypeDef *p_plugin)
     pluginRegLinkList *node = p_plugin->p_head;
 
     cJSON *item = NULL;
+    cJSON *status = NULL;
 
-    for (size_t i = 0; i < p_plugin->moduleNum; i++)
+    for (size_t i = 0; (i < p_plugin->moduleNum) && (node != NULL); i++)
     {
-
         // 获取配置文件键值
         item = cJSON_GetObjectItem(root, node->moduleMsg->moduleName);
-
-        // 获取失败则对比下一节点
         if (item == NULL)
         {
-            log_printf("configFileGet: cJSON_Parse error!\n");
-            node = node->next;
+            log_printf("configFileGet [ERROR] item = cJSON_GetObjectItem(root, node->moduleMsg->moduleName);\n");
+            node = node->next; // 获取失败则对比下一节点
             continue;
         }
         else
         {
-            if (item->type != cJSON_String)
+            if (item->type != cJSON_Object)
             {
-                log_printf("configFileGet: item->type error!\n");
+                log_printf("configFileGet [ERROR] if (item->type != cJSON_Object)\n");
                 node = node->next;
                 continue;
             }
         }
 
+        status = cJSON_GetObjectItem(item, "status");
+        if (status == NULL)
+        {
+            log_printf("configFileGet [ERROR] status = cJSON_GetObjectItem(item, \" status \");\n");
+            return -1;
+        }
+        else
+        {
+            if (status->type != cJSON_String)
+            {
+                log_printf("configFileGet [ERROR] if (status->type != cJSON_String)\n");
+                return -1;
+            }
+        }
         // 获取成功则确定是否需要使能
-        if (strcmp(item->valuestring, "enable"))
+        if (strcmp(status->valuestring, "enable"))
         {
             node->status = MODULE_STOP;
         }
@@ -229,5 +241,3 @@ int plugin_reg_destroy(pluginModuleTypeDef *p_plugin)
 
     return 0;
 }
-
-
