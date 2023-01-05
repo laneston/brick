@@ -1,0 +1,1 @@
+https://codeload.github.com/nanomsg/nng/tar.gz/refs/tags/v1.5.2

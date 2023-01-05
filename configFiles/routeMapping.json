@@ -1,0 +1,12 @@
+{
+	"testa": [
+		"testb"
+	],
+	"testb": [
+		"testa",
+		"testc"
+	],
+	"testc": [
+		"testb"
+	]
+}

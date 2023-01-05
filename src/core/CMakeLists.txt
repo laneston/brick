@@ -1,0 +1,19 @@
+file(GLOB SOURCES_TAR 
+	"${CMAKE_CURRENT_LIST_DIR}/*.c"
+	"${CMAKE_CURRENT_LIST_DIR}/plugin/*.c"
+	"${CMAKE_CURRENT_LIST_DIR}/router/*.c")
+
+
+target_sources(${PROJECT_NAME}
+	PRIVATE
+	${SOURCES_TAR}
+	PUBLIC
+	${SOURCES_TAR}
+)
+
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+	"${CMAKE_CURRENT_LIST_DIR}"
+	"${CMAKE_CURRENT_LIST_DIR}/plugin"
+	"${CMAKE_CURRENT_LIST_DIR}/router"
+)
