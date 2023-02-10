@@ -49,20 +49,15 @@ static void *threadPool_task(void *arg)
         {
             // log_printf("threadPool_task >> queue_nums abnormal[1]\n");
             pthread_cond_wait(&(pool->cond_queue_nonempty), &(pool->mutex)); // wait the nonempty message.
-
-            // unlock the thread pool.
-            pthread_mutex_unlock(&(pool->mutex));
         }
-
-        // lock the thread pool.
-        pthread_mutex_lock(&(pool->mutex));
 
         p_task = pool->p_head;
         pool->p_head = p_task->next;
 
-        if (p_task == NULL)
+        if (p_task == NULL) // 判断是否为空指针
         {
             log_printf("threadPool_task >> [p_task == NULL] queue_nums: %d\n", pool->queue_nums);
+            pthread_mutex_unlock(&(pool->mutex));
             continue;
         }
 
@@ -97,6 +92,7 @@ int threadpool_add_task(threadPool_TypeDef *pool, void *(*callback_func)(void *a
     assert(pool != NULL && callback_func != NULL);
 
     // lock the thread pool.
+
     pthread_mutex_lock(&(pool->mutex));
 
     if (pool->flag_queue_close || pool->flag_pool_close)
@@ -110,10 +106,7 @@ int threadpool_add_task(threadPool_TypeDef *pool, void *(*callback_func)(void *a
     {
         log_printf("threadpool_add_task >> queue_nums abnormal[0]!\n");
         pthread_cond_wait(&(pool->cond_queue_underfull), &(pool->mutex));
-        pthread_mutex_unlock(&(pool->mutex));
     }
-
-    pthread_mutex_lock(&(pool->mutex));
 
     /**build the cache for tasks*/
     taskFunc_listList *p_task = (taskFunc_listList *)malloc(sizeof(taskFunc_listList));
