@@ -13,6 +13,10 @@
 #include "main.h"
 #include "plugin.h"
 
+// 任务加入队列 -> 解锁 -> 线程池收到非空广播信息 -> 上锁 -> 执行队列任务 -> 解锁
+// 问题：线程池收到非空广播后，所有任务线程都执行，如队列无任务会强制执行空指针，会引发潜在BUG
+// 解决：任务线程收到非空广播后需额外判断任务队列中是否有任务存在
+
 /**
  * @brief  threadPool_task
  * @note
@@ -32,21 +36,35 @@ static void *threadPool_task(void *arg)
         // lock the thread pool.
         pthread_mutex_lock(&(pool->mutex));
 
-        // check the state of the pool.
-        while ((pool->queue_nums == 0) && (pool->flag_queue_close == false))
-        {
-            pthread_cond_wait(&(pool->cond_queue_nonempty), &(pool->mutex)); // wait the nonempty message.
-        }
-
         // if the thread pool close, exit.
         if (pool->flag_pool_close)
         {
+            log_printf("threadPool_task >> flag_pool_close\n");
             pthread_mutex_unlock(&(pool->mutex));
             return NULL;
         }
 
+        // check the state of the pool.
+        while ((pool->queue_nums == 0) && (pool->flag_queue_close == false))
+        {
+            // log_printf("threadPool_task >> queue_nums abnormal[1]\n");
+            pthread_cond_wait(&(pool->cond_queue_nonempty), &(pool->mutex)); // wait the nonempty message.
+
+            // unlock the thread pool.
+            pthread_mutex_unlock(&(pool->mutex));
+        }
+
+        // lock the thread pool.
+        pthread_mutex_lock(&(pool->mutex));
+
         p_task = pool->p_head;
         pool->p_head = p_task->next;
+
+        if (p_task == NULL)
+        {
+            log_printf("threadPool_task >> [p_task == NULL] queue_nums: %d\n", pool->queue_nums);
+            continue;
+        }
 
         if (pool->queue_nums > QUEUE_MAX_NUM - 1)
             pthread_cond_broadcast(&(pool->cond_queue_underfull)); // send underfull message
@@ -66,7 +84,6 @@ static void *threadPool_task(void *arg)
     return NULL;
 }
 
-
 /**
  * @brief  threadpool_add_task
  * @note
@@ -82,14 +99,21 @@ int threadpool_add_task(threadPool_TypeDef *pool, void *(*callback_func)(void *a
     // lock the thread pool.
     pthread_mutex_lock(&(pool->mutex));
 
-    if ((pool->queue_nums > QUEUE_MAX_NUM - 1) && !(pool->flag_queue_close || pool->flag_pool_close))
-        pthread_cond_wait(&(pool->cond_queue_underfull), &(pool->mutex));
-
     if (pool->flag_queue_close || pool->flag_pool_close)
     {
+        ERROR_ASSERT();
         pthread_mutex_unlock(&(pool->mutex));
         return -1;
     }
+
+    if ((pool->queue_nums > QUEUE_MAX_NUM - 1) && !(pool->flag_queue_close || pool->flag_pool_close))
+    {
+        log_printf("threadpool_add_task >> queue_nums abnormal[0]!\n");
+        pthread_cond_wait(&(pool->cond_queue_underfull), &(pool->mutex));
+        pthread_mutex_unlock(&(pool->mutex));
+    }
+
+    pthread_mutex_lock(&(pool->mutex));
 
     /**build the cache for tasks*/
     taskFunc_listList *p_task = (taskFunc_listList *)malloc(sizeof(taskFunc_listList));
@@ -166,8 +190,6 @@ threadPool_TypeDef *threadPool_init(unsigned short thread_nums)
     return pool;
 }
 
-
-
 /**
  * @brief  threadPool_wait
  * @note
@@ -188,10 +210,6 @@ int threadPool_wait(threadPool_TypeDef *pool)
 
     return ret;
 }
-
-
-
-
 
 /**
  * @brief  threadPool_destroy
