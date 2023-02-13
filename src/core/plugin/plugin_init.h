@@ -25,6 +25,7 @@ extern "C"
      */
     extern int plugin_init(char *param);
     extern int plugin_destroy(void);
+    extern int plugin_printfVer(void);
 
 #ifdef __cplusplus
 }

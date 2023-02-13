@@ -18,6 +18,7 @@ static void help(void)
     printf("option:\n");
     printf("       -h print help information\n");
     printf("       -v print version\n");
+	printf("       -V print all plugins version\n");
 }
 
 /**
@@ -29,7 +30,7 @@ static void help(void)
  */
 int optionGet(int argc, char **argv)
 {
-    int ret = getopt(argc, argv, "hvs:");
+    int ret = getopt(argc, argv, "hvVs:");
     if (ret < 0)
     {
         log_printf("optionGet: ret = %d\n", ret);
@@ -45,6 +46,11 @@ int optionGet(int argc, char **argv)
 
     case 'v':
         printf("version: %s\n", SOFTWAREVERSION);
+        exit(0);
+        break;
+
+    case 'V':
+        plugin_printfVer();
         exit(0);
         break;
 

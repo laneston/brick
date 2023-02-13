@@ -18,7 +18,7 @@ extern "C"
 {
 #endif
 
-#define SOFTWAREVERSION "v1.0.0"
+#define SOFTWAREVERSION "v1.0.1"
 
 #ifdef __cplusplus
 }

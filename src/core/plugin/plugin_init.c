@@ -17,6 +17,29 @@ pluginModuleTypeDef *global_pluginModule = NULL;
 static char global_moduleName[128] = {0};
 
 /**
+ * @brief  plugin_printfVer
+ * @note
+ * @param  *param:
+ * @retval
+ */
+int plugin_printfVer(void)
+{
+    global_pluginModule = plugin_reg_init();
+    assert(global_pluginModule != NULL);
+
+    pluginRegLinkList *node = global_pluginModule->p_head;
+
+    // log_printf("global_pluginModule->moduleNum: %d\n", global_pluginModule->moduleNum);
+    for (size_t i = 0; (i < global_pluginModule->moduleNum) && (node != NULL); i++)
+    {
+        printf(">>> %s version: %s\n", node->moduleMsg->moduleName, node->moduleMsg->moduleVersion);
+        node = node->next;
+    }
+
+    return 0;
+}
+
+/**
  * @brief  plugin_init
  * @note
  * @param  *param:
@@ -27,7 +50,7 @@ int plugin_init(char *param)
     int ret;
 
     assert(param != NULL);
-    log_printf("plugin_init: param [%s]\n", param);
+    log_printf("plugin_init >> param [%s]\n", param);
 
     global_pluginModule = plugin_reg_init();
     assert(global_pluginModule != NULL);
