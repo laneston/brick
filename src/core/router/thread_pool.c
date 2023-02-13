@@ -52,17 +52,21 @@ static void *threadPool_task(void *arg)
         }
 
         p_task = pool->p_head;
-        pool->p_head = p_task->next;
 
-        if (p_task == NULL) // 判断是否为空指针
+        if (p_task == NULL || pool->queue_nums == 0) // 判断是否为空指针
         {
             log_printf("threadPool_task >> [p_task == NULL] queue_nums: %d\n", pool->queue_nums);
             pthread_mutex_unlock(&(pool->mutex));
             continue;
         }
 
+        pool->p_head = p_task->next;
+
         if (pool->queue_nums > QUEUE_MAX_NUM - 1)
+        {
+            log_printf("threadPool_task >> pthread_cond_broadcast cond_queue_underfull\n");
             pthread_cond_broadcast(&(pool->cond_queue_underfull)); // send underfull message
+        }
 
         pool->queue_nums--;
 
@@ -104,7 +108,7 @@ int threadpool_add_task(threadPool_TypeDef *pool, void *(*callback_func)(void *a
 
     if ((pool->queue_nums > QUEUE_MAX_NUM - 1) && !(pool->flag_queue_close || pool->flag_pool_close))
     {
-        log_printf("threadpool_add_task >> queue_nums abnormal[0]!\n");
+        log_printf("threadpool_add_task >> queue_nums abnormal[%d]!\n", pool->queue_nums);
         pthread_cond_wait(&(pool->cond_queue_underfull), &(pool->mutex));
     }
 

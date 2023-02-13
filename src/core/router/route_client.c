@@ -158,11 +158,11 @@ int route_client_send(brickRoute_TypeDef *t_route, void *data, size_t len)
  */
 int route_client_recv(brickRoute_TypeDef *t_route, void *data)
 {
-    // if ((t_route == NULL) || (data == NULL))
-    // {
-    //     printf("route_client_recv: input param is NULL! or len less than 0!\n");
-    //     return -1;
-    // }
+    if ((t_route == NULL) || (data == NULL))
+    {
+        printf("route_client_recv >> input param is NULL or the len less than 0!\n");
+        return -1;
+    }
 
     char *buf = NULL;
     int rv;

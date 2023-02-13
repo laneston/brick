@@ -86,13 +86,7 @@ static queue_stringTypeDef *queue_malloc(nng_socket sock, char *strBuff, int str
 static void queue_free(queue_stringTypeDef *queue_temp)
 {
     if (queue_temp == NULL)
-    {
         return;
-    }
-
-    /**nng_send with NNG_FLAG_ALLOC be not need here.*/
-    // free(queue_temp->strBuff);
-    // queue_temp->strBuff = NULL;
 
     free(queue_temp);
     queue_temp = NULL;
@@ -101,7 +95,7 @@ static void queue_free(queue_stringTypeDef *queue_temp)
 // receive process queue
 static void *queue_relay(void *arg)
 {
-    unsigned short counter = 3; // 最大重传次数
+    static unsigned short counter = 3; // 最大重传次数
     if (arg == NULL)
     {
         log_printf("queue_relay: (arg == NULL)\n");
@@ -111,12 +105,12 @@ static void *queue_relay(void *arg)
     queue_stringTypeDef *queue_o = arg;
     int rv;
 
-    log_printf("[%s >> %s] %s\n", queue_o->src_sock, queue_o->dir_sock, queue_o->strBuff);
+    log_printf("[%s >> %s](%d) %s\n", queue_o->src_sock, queue_o->dir_sock, queue_o->strLen, queue_o->strBuff);
     while (counter--)
     {
         if ((rv = nng_send(queue_o->sock, queue_o->strBuff, queue_o->strLen, NNG_FLAG_ALLOC)) != 0)
         {
-            log_printf("queue_relay >> nng_send failed [%d]!\n", rv);
+            log_printf("queue_relay >> nng_send failed [%d]! [%s >> %s]\n", rv, queue_o->src_sock, queue_o->dir_sock);
         }
         else
         {
@@ -128,6 +122,7 @@ static void *queue_relay(void *arg)
     if (!counter)
     {
         // free the malloc space if failure.
+        ERROR_ASSERT();
         free(queue_o->strBuff);
         queue_o->strBuff = NULL;
     }
@@ -369,35 +364,9 @@ PAIR_LOOP:
 
     while (p_route->flag_rev)
     {
-        // 阻塞模式，对接收产生影响
-        // if (counter && counter < 3)
-        // {
-        //     if ((rv = nng_send(tmp_node->o_route->socket, buf, sz, NNG_FLAG_ALLOC)) != 0)
-        //     {
-        //         log_printf("listen_recv_mapping_pair >> nng_send failed [%d]!\n", rv);
-        //         counter++;
-        //         continue;
-        //     }
-        // }
-        // else if (counter > 2)
-        // {
-        //     counter = 0;
-        //     log_printf("listen_recv_mapping_pair >> nng_send timeout!\n");
-        // }
-        // else
-        // {
-        // }
-
         // 接收p_route->o_route->socket数据，发送至tmp_node->o_route->socket
         if ((rv = nng_recv(p_route->o_route->socket, &buf, &sz, NNG_FLAG_ALLOC)) == 0)
         {
-            // counter = 0;
-            // log_printf("pair_send >> %s, %s\n", tmp_node->routeName, buf);
-            // if ((rv = nng_send(tmp_node->o_route->socket, buf, sz, NNG_FLAG_ALLOC)) != 0)
-            // {
-            //     printf("listen_recv_mapping_pair >> nng_send failed [%d]!\n", rv);
-            //     counter++;
-            // }
             // 使用线程池实现将传输数据动作，增加重传操作，且不影响数据接收
             // 制作结构体参数
             queue_temp = queue_malloc(tmp_node->o_route->socket, buf, sz, p_route->routeName, tmp_node->routeName);
@@ -407,9 +376,9 @@ PAIR_LOOP:
                 continue;
             }
             // 将任务放入线程池
-            if (threadpool_add_task(threadPool, queue_relay, (void *)queue_temp) < 0)
+            if ((rv = threadpool_add_task(threadPool, queue_relay, (void *)queue_temp)) < 0)
             {
-                log_printf("threadpool_add_task: queue_relay error!\n");
+                log_printf("threadpool_add_task >> queue_relay error [%d]!\n", rv);
             }
 
             nng_free(buf, sz);

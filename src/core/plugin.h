@@ -26,7 +26,7 @@ extern "C"
 #define FILE_ROUTE_DIR "./routeMapping.json"
 #define FILE_ROUTE_LEN 2048
 
-#define THREADPOOL_NUMS 32
+#define THREADPOOL_NUMS 16
 #define QUEUE_MAX_NUM (THREADPOOL_NUMS * 2)
 
 // the target name and direction.
