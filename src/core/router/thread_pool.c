@@ -12,6 +12,7 @@
 #include "thread_pool.h"
 #include "main.h"
 #include "plugin.h"
+#include "sys/syscall.h"
 
 // 任务加入队列 -> 解锁 -> 线程池收到非空广播信息 -> 上锁 -> 执行队列任务 -> 解锁
 // 问题：线程池收到非空广播后，所有任务线程都执行，如队列无任务会强制执行空指针，会引发潜在BUG
@@ -30,6 +31,8 @@ static void *threadPool_task(void *arg)
     threadPool_TypeDef *pool = (threadPool_TypeDef *)arg;
 
     taskFunc_listList *p_task = NULL;
+
+    // pid_t gettid = syscall(SYS_gettid);
 
     while (pool->flag_pool_running)
     {
@@ -52,15 +55,14 @@ static void *threadPool_task(void *arg)
         }
 
         p_task = pool->p_head;
-
-        if (p_task == NULL || pool->queue_nums == 0) // 判断是否为空指针
-        {
-            log_printf("threadPool_task >> [p_task == NULL] queue_nums: %d\n", pool->queue_nums);
-            pthread_mutex_unlock(&(pool->mutex));
-            continue;
-        }
-
         pool->p_head = p_task->next;
+
+        // if (p_task == NULL || pool->queue_nums == 0) // 判断是否为空指针
+        // {
+        //     log_printf("threadPool_task >> [p_task == NULL] queue_nums: %d\n", pool->queue_nums);
+        //     pthread_mutex_unlock(&(pool->mutex));
+        //     continue;
+        // }
 
         if (pool->queue_nums > QUEUE_MAX_NUM - 1)
         {
@@ -78,6 +80,8 @@ static void *threadPool_task(void *arg)
 
         free(p_task);
         p_task = NULL;
+
+        // log_printf("threadPool_task >>> [%ld] done.\n", gettid);
     }
 
     return NULL;
@@ -114,7 +118,7 @@ int threadpool_add_task(threadPool_TypeDef *pool, void *(*callback_func)(void *a
 
     /**build the cache for tasks*/
     taskFunc_listList *p_task = (taskFunc_listList *)malloc(sizeof(taskFunc_listList));
-    assert(p_task != NULL);
+    // assert(p_task != NULL);
 
     /*take the funcuion and param to the pionter*/
     p_task->callback_func = callback_func;
@@ -181,7 +185,7 @@ threadPool_TypeDef *threadPool_init(unsigned short thread_nums)
     {
         ret = pthread_create(&(pool->pthreads[i]), NULL, threadPool_task, (void *)pool);
         assert(ret == 0);
-        log_printf("threadPool_init: [pool->pthreads: %ld]\n", pool->pthreads[i]);
+        log_printf("threadPool_init >> [pool->pthreads: %ld]\n", pool->pthreads[i]);
     }
 
     return pool;

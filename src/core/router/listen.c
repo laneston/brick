@@ -95,7 +95,7 @@ static void queue_free(queue_stringTypeDef *queue_temp)
 // receive process queue
 static void *queue_relay(void *arg)
 {
-    static unsigned short counter = 3; // 最大重传次数
+    unsigned short counter = 5; // 最大重传次数
     if (arg == NULL)
     {
         log_printf("queue_relay: (arg == NULL)\n");

@@ -39,9 +39,9 @@ extern "C"
         pthread_t *pthreads;                 //
         pthread_mutex_t mutex;               //
                                              //
-        pthread_cond_t cond_queue_empty;     //队列以空信号
-        pthread_cond_t cond_queue_nonempty;  //队列非空信号
-        pthread_cond_t cond_queue_underfull; //队列非满信号
+        pthread_cond_t cond_queue_empty;     // 队列以空信号
+        pthread_cond_t cond_queue_nonempty;  // 队列非空信号
+        pthread_cond_t cond_queue_underfull; // 队列非满信号
                                              //
         bool flag_queue_close;               //
         bool flag_pool_close;                //
