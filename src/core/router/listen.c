@@ -98,7 +98,7 @@ static void *queue_relay(void *arg)
     unsigned short counter = 5; // 最大重传次数
     if (arg == NULL)
     {
-        log_printf("queue_relay: (arg == NULL)\n");
+        ERROR_ASSERT();
         return NULL;
     }
 

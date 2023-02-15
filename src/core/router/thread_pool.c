@@ -32,7 +32,8 @@ static void *threadPool_task(void *arg)
 
     taskFunc_listList *p_task = NULL;
 
-    // pid_t gettid = syscall(SYS_gettid);
+    pid_t gettid = syscall(SYS_gettid);
+    pthread_t getpthreads = pthread_self();
 
     while (pool->flag_pool_running)
     {
@@ -42,7 +43,7 @@ static void *threadPool_task(void *arg)
         // if the thread pool close, exit.
         if (pool->flag_pool_close)
         {
-            log_printf("threadPool_task >> flag_pool_close\n");
+            ERROR_ASSERT();
             pthread_mutex_unlock(&(pool->mutex));
             return NULL;
         }
@@ -50,7 +51,7 @@ static void *threadPool_task(void *arg)
         // check the state of the pool.
         while ((pool->queue_nums == 0) && (pool->flag_queue_close == false))
         {
-            // log_printf("threadPool_task >> queue_nums abnormal[1]\n");
+            log_printf("threadPool_task >>> [%d] [%ld] wait.\n", gettid, getpthreads);
             pthread_cond_wait(&(pool->cond_queue_nonempty), &(pool->mutex)); // wait the nonempty message.
         }
 
@@ -81,7 +82,7 @@ static void *threadPool_task(void *arg)
         free(p_task);
         p_task = NULL;
 
-        // log_printf("threadPool_task >>> [%ld] done.\n", gettid);
+        log_printf("threadPool_task >>> [%d] [%ld] done.\n", gettid, getpthreads);
     }
 
     return NULL;
