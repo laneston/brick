@@ -51,7 +51,7 @@ static void *threadPool_task(void *arg)
         // check the state of the pool.
         while ((pool->queue_nums == 0) && (pool->flag_queue_close == false))
         {
-            log_printf("threadPool_task >>> [%d] [%ld] wait.\n", gettid, getpthreads);
+            // log_printf("threadPool_task >>> [%d] [%ld] wait.\n", gettid, getpthreads);
             pthread_cond_wait(&(pool->cond_queue_nonempty), &(pool->mutex)); // wait the nonempty message.
         }
 

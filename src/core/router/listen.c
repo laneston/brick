@@ -116,7 +116,7 @@ static void *queue_relay(void *arg)
         {
             break;
         }
-        usleep(50);
+        // usleep(50);
     }
 
     if (!counter)
@@ -192,6 +192,12 @@ MAPPING_LOOP:
                 log_printf("listen_recv_mapping >> routeName: %s\n", tmp_node->routeName);
                 sock_tmp[i] = tmp_node->o_route->socket;
                 strcpy(sock_name[i], tmp_node->routeName);
+                /**设置发送方超时时间，避免程序阻塞*/
+                if ((rv = nng_socket_set_ms(tmp_node->o_route->socket, NNG_OPT_RECVTIMEO, 100)) != 0)
+                {
+                    log_printf("nng_socket_set_ms: %d\n", rv);
+                    return NULL;
+                }
                 counter++; // 每轮计数+1
             }
 
@@ -202,6 +208,13 @@ MAPPING_LOOP:
             log_printf("listen_recv_mapping >> routeName: %s\n", tmp_node->routeName);
             sock_tmp[i] = tmp_node->o_route->socket;
             strcpy(sock_name[i], tmp_node->routeName);
+            /**设置发送方超时时间，避免程序阻塞*/
+            if ((rv = nng_socket_set_ms(tmp_node->o_route->socket, NNG_OPT_RECVTIMEO, 100)) != 0)
+            {
+                log_printf("nng_socket_set_ms: %d\n", rv);
+                return NULL;
+            }
+
             counter++; // 每轮计数+1
         }
     }
@@ -319,6 +332,12 @@ PAIR_LOOP:
         if (!strcmp(p_route->relayNode[0], tmp_node->routeName))
         {
             printf("listen_recv_mapping_pair: %s\n", p_route->relayNode[0]);
+            /**设置发送方超时时间，避免程序阻塞*/
+            if ((rv = nng_socket_set_ms(tmp_node->o_route->socket, NNG_OPT_RECVTIMEO, 100)) != 0)
+            {
+                log_printf("nng_socket_set_ms: %d\n", rv);
+                return NULL;
+            }
             break;
         }
         tmp_node = tmp_node->next;
