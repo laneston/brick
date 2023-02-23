@@ -34,6 +34,9 @@ extern "C"
 #define __TARGET_DIR__ "/userdata/dgri/brick"
     // #define __TARGET_DIR__ "/root/brick"
 
+#define __ROUTE_RETRY_ 5
+#define __RETRY_PERIOD_US_ 5000
+
 #include "route_client.h"
 
     /**

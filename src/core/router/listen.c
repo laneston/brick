@@ -116,7 +116,7 @@ static void *queue_relay(void *arg)
         {
             break;
         }
-        // usleep(50);
+        usleep(__RETRY_PERIOD_US_);
     }
 
     if (!counter)
