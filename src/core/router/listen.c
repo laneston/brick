@@ -122,9 +122,13 @@ static void *queue_relay(void *arg)
     if (!counter)
     {
         // free the malloc space if failure.
-        ERROR_ASSERT();
-        free(queue_o->strBuff);
-        queue_o->strBuff = NULL;
+        // ERROR_ASSERT();
+        log_printf("queue_relay >> free the malloc space if failure.\n");
+        if (queue_o->strBuff != NULL)
+        {
+            free(queue_o->strBuff);
+            queue_o->strBuff = NULL;
+        }
     }
 
     // free the malloc
