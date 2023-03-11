@@ -24,6 +24,7 @@ void log_printf(const char *fmt, ...)
 
     va_start(ap, fmt);
     vsyslog(LOG_INFO, fmt, ap);
+    vprintf(fmt, ap);
     va_end(ap);
 }
 #else

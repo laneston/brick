@@ -27,6 +27,11 @@ int main(int argc, char **argv)
     signal(SIGPIPE, signal_handler);
     signal(SIGINT, signal_handler);
 
+#ifdef RSYSLOG
+    printf("rsyslog star openlog...\n");
+    openlog("brick", LOG_PID | LOG_NDELAY, LOG_USER);
+#endif
+
     /* parse command line options */
     if (optionGet(argc, argv) < 0)
     {
