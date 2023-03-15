@@ -52,5 +52,5 @@ Mkfile.old
 dkms.conf
 build/
 target/
-nng-*
-nng.tar*
+libraries_path/
+toolchain/

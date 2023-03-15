@@ -14,6 +14,7 @@ ENDIF(RSYSLOG)
 
 INCLUDE(cmake/nng.cmake)
 
+
 FILE(GLOB SOURCES
 	"${PROJECT_SOURCE_DIR}/src/*.c")
 

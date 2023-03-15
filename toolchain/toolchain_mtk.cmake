@@ -3,7 +3,8 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
 # set the toolchain path
-set(TOOL_CHAIN_DIR /home/toolchain-aarch64_cortex-a53_gcc-11.2.0_musl)
+# set(TOOL_CHAIN_DIR /home/toolchain-aarch64_cortex-a53_gcc-11.2.0_musl)
+set(TOOL_CHAIN_DIR /home/openwrt-toolchain-mediatek-mt7622_gcc-11.3.0_musl/toolchain-aarch64_cortex-a53_gcc-11.3.0_musl)
 
 # set the toolchain lib & include files
 set(TOOL_CHAIN_INCLUDE ${TOOL_CHAIN_DIR}/include)
@@ -11,7 +12,7 @@ set(TOOL_CHAIN_LIB ${TOOL_CHAIN_DIR}/lib)
 
 # set the compiler
 set(CMAKE_C_COMPILER "${TOOL_CHAIN_DIR}/bin/aarch64-openwrt-linux-gcc")
-# set(CMAKE_CXX_COMPILER "${TOOL_CHAIN_DIR}/bin/aarch64-openwrt-linux-g++")
+set(CMAKE_CXX_COMPILER "${TOOL_CHAIN_DIR}/bin/aarch64-openwrt-linux-g++")
 
 # set the cmake find root path
 # set(CMAKE_FIND_ROOT_PATH ${TOOL_CHAIN_DIR})

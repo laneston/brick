@@ -49,12 +49,23 @@ int plugin_fork(pluginModuleTypeDef *p_plugin)
     assert(p_plugin != NULL);
     pthread_t tid_monitor;
 
+    char target_dir[1024] = {0};
+
     pluginRegLinkList *node = p_plugin->p_head;
     if (node == NULL)
     {
         ERROR_ASSERT();
         return -1;
     }
+
+    // 获取执行文件当前路径
+    if (getcwd(target_dir, sizeof(target_dir)) < 0)
+    {
+        ERROR_ASSERT();
+    }
+
+    strcat(target_dir, __TARGET_NAME__);
+    printf("plugin_fork >> target_dir: %s\n", target_dir);
 
     for (size_t i = 0; i < p_plugin->moduleNum; i++)
     {
@@ -67,7 +78,9 @@ int plugin_fork(pluginModuleTypeDef *p_plugin)
             }
             else if (tpid == 0)
             {
-                int rev = execl(__TARGET_DIR__, __TARGET_NAME__, "-s", node->moduleMsg->moduleName, NULL);
+                // int rev = execl(__TARGET_DIR__, __TARGET_NAME__, "-s", node->moduleMsg->moduleName, NULL);
+                int rev = execl(target_dir, __TARGET_NAME__, "-s", node->moduleMsg->moduleName, NULL);
+
                 if (rev != 0)
                 {
                     log_printf("plugin_fork: execv error code: [%d]\n", rev);

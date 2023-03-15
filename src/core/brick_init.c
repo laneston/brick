@@ -14,9 +14,7 @@
 #include "plugin_fork.h"
 #include "plugin_reg.h"
 
-
 pluginModuleTypeDef *handle_pluginModule;
-
 
 /**
  * @brief  brick_init

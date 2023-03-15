@@ -12,6 +12,7 @@
 #include "main.h"
 #include "brick_init.h"
 #include "getopt.h"
+#include "httpd_listen.h"
 #include "sighandle.h"
 
 /**
@@ -37,6 +38,12 @@ int main(int argc, char **argv)
     {
         ERROR_ASSERT();
         exit(-1);
+    }
+
+    // httpd process.
+    if (httpd_init() < 0)
+    {
+        ERROR_ASSERT();
     }
 
     if (brick_init() < 0)

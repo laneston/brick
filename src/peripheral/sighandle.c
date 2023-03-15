@@ -22,7 +22,7 @@ void signal_handler(int sig)
     switch (sig)
     {
     case SIGINT: /* ctrl + c */
-        printf("\nthe brick exit!\n");
+        printf("\n<<< the brick exit! >>>\n");
         plugin_destroy();
         exit(0);
         break;

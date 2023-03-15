@@ -49,11 +49,13 @@ int plugin_init(char *param)
 {
     int ret;
 
-    assert(param != NULL);
-    log_printf("plugin_init >> param [%s]\n", param);
-
     global_pluginModule = plugin_reg_init();
     assert(global_pluginModule != NULL);
+
+    if (param == NULL)
+    {
+        return 1;
+    }
 
     strcpy(global_moduleName, param); // save the module name.
 
@@ -120,17 +122,20 @@ int plugin_destroy(void)
     int ret;
 
     pluginRegLinkList *node = global_pluginModule->p_head;
-    if (node == NULL)
-    {
-        ERROR_ASSERT();
-        return -1;
-    }
+    assert(node != NULL);
+
+    printf("plugin_destroy >> global_pluginModule->moduleNum: %d\n", global_pluginModule->moduleNum);
 
     for (size_t i = 0; (i < global_pluginModule->moduleNum) && (node != NULL); i++)
     {
         if (!strcmp(node->moduleMsg->moduleName, global_moduleName))
         {
-            ret = node->moduleMsg->destroy();
+            if (node->status != MODULE_STOP)
+            {
+                ret = node->moduleMsg->destroy();
+                assert(ret >= 0);
+            }
+
             log_printf("destroy >> moduleName %s, ret: %d\n", node->moduleMsg->moduleName, ret);
         }
 
