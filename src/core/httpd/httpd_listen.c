@@ -13,6 +13,9 @@
 #include "main.h"
 #include <stdbool.h>
 
+
+volatile int server_sock = -1;
+
 /**********************************************************************/
 /* Print out an error message with perror() (for system errors; based
  * on value of errno, which indicates system call errors) and exit the
@@ -79,7 +82,7 @@ static int startup(u_short *port)
 int httpd_init(void)
 {
 
-    int server_sock = -1;
+    
     u_short port = 4000;
     int client_sock = -1;
     struct sockaddr_in client_name;

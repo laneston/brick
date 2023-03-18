@@ -19,6 +19,7 @@ extern "C"
 #endif
 
     extern void accept_request(void *arg);
+	extern int get_line(int sock, char *buf, int size);
 
 #ifdef __cplusplus
 }

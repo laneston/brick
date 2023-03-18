@@ -1,5 +1,6 @@
 
 
+#include "cgi.h"
 #include "main.h"
 
 #define ISspace(x) isspace((int)(x))
@@ -92,7 +93,7 @@ static void headers(int client, const char *filename)
  *             the size of the buffer
  * Returns: the number of bytes stored (excluding null) */
 /**********************************************************************/
-static int get_line(int sock, char *buf, int size)
+int get_line(int sock, char *buf, int size)
 {
     int i = 0;
     char c = '\0';
@@ -171,8 +172,6 @@ static void serve_file(int client, const char *filename)
     }
     fclose(resource);
 }
-
-
 
 /**********************************************************************/
 /* A request has caused a call to accept() on the server port to
@@ -281,7 +280,7 @@ void accept_request(void *arg)
 
         else
         {
-            // execute_cgi(client, path, method, query_string);
+            execute_cgi(client, path, method, query_string);
         }
     }
 
