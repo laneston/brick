@@ -74,6 +74,8 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
     buf[0] = 'A';
     buf[1] = '\0';
 
+    printf("execute_cgi: %s\n", path);
+
     if (strcasecmp(method, "GET") == 0)
     {
         while ((numchars > 0) && strcmp("\n", buf)) /* read & discard headers */
@@ -103,6 +105,8 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
     {
         printf("execute_cgi >> HEAD or othe\n");
     }
+
+
 
     if (pipe(cgi_output) < 0)
     {
@@ -175,3 +179,5 @@ void execute_cgi(int client, const char *path, const char *method, const char *q
         waitpid(pid, &status, 0);
     }
 }
+
+
